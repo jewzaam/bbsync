@@ -25,10 +25,8 @@ echo "  <DIRECTORY> [words for search]"
 for FILE_STAGED in `ls -1 $STAGING`
 do
     COUNT=`find $ROOT -name $FILE_STAGED | grep -v "$STAGING" | wc -l`
-    if [ $COUNT != "0" ]; then
-        # delete any staged files that already exist
-        rm "$STAGING/$FILE_STAGED"
-    else
+    # skip any staged files that already exist
+    if [ $COUNT == "0" ]; then
         # open with evince and then prompt use for option:
         #   skip = delete from stage
         #   other text is name of directory to stage into
@@ -36,18 +34,18 @@ do
         PID=$!
         read A B
         if [ "$A" == "" ]; then
-            rm "$STAGING/$FILE_STAGED"
             TARGET=""
         elif [ "$A" != "+" ]; then
             TARGET="$ROOT/$A"
-            KEYWORDS=$B
         fi
         kill -9 $PID
+
+        KEYWORDS=$B
 
         if [ "$TARGET" != "" ]; then
             mkdir -p $TARGET
             mv "$STAGING/$FILE_STAGED" $TARGET
-            echo $KEYWORDS >> "$TARGET/keywords"
+            echo $KEYWORDS >> "$TARGET/$FILE_STAGED.txt"
         fi
     fi
 done;
@@ -60,6 +58,7 @@ for D in `find $ROOT -mindepth 1 -maxdepth 1 -type d`
 do
     pushd $D
         # create ps from notes
+        cat *.txt | sort | uniq > keywords
         enscript -p keywords.ps keywords
         # convert ps to pdf
         ps2pdf keywords.ps keywords.pdf
@@ -67,6 +66,7 @@ do
         rm output.pdf
         ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o output.pdf
         # cleanup keyword temp stuff
-        rm keywords.ps keywords.pdf
+        rm keywords keywords.ps keywords.pdf
     popd
 done;
+
