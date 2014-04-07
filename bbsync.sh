@@ -8,8 +8,8 @@ STAGING=$ROOT/STAGE
 
 if [ ! -d $DEVICE ]; then
     echo "Boogie Board Sync device not found at this location: " $DEVICE
-    echo "Did you plug it in?  Exiting.."
-    exit 1
+    echo "Did you plug it in?  Press enter to continue anyway, or kill the process with CTRL+C: "
+    read X
 fi
 
 # make sure staging area exists
@@ -65,6 +65,9 @@ do
         enscript -p keywords.ps keywords
         # convert ps to pdf
         ps2pdf keywords.ps keywords.pdf
+        # crop keywords so it's not as wide in the final document
+        pdfcrop keywords.pdf cropped.pdf
+        rm keywords.pdf
         # clob all pdf's together into one file
         rm output.pdf "../$OUTPUT_BASE.pdf"
         ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o "../$OUTPUT_BASE.pdf"

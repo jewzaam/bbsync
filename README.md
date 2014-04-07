@@ -6,7 +6,11 @@ Bash script to sync content from a boogie board sync to linux and knit things to
 Dependencies
 ============
 
-evince
-enscript
-ps2pdf
-[sejda-console](http://www.sejda.org/)
+## Packages
+* enscript
+* evince
+* ghostscript
+* texlive-utils
+
+## Other
+* [sejda-console](http://www.sejda.org/)
