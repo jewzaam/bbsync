@@ -57,16 +57,17 @@ rm -rf $STAGING
 for D in `find $ROOT -mindepth 1 -maxdepth 1 -type d`
 do
     pushd $D
+        OUTPUT_BASE=`echo $D | sed "s#$ROOT/##g"`
         # write directory to txt file so is in keywords, replace - and _ with space (replace existing output.txt file)
-        echo $D | sed "s#$ROOT/##g" | tr '-' ' ' | tr '_' ' ' > output.txt
+        echo $OUTPUT_BASE | tr '-' ' ' | tr '_' ' ' > output.txt
         # create ps from notes
         cat *.txt | sort | uniq > keywords
         enscript -p keywords.ps keywords
         # convert ps to pdf
         ps2pdf keywords.ps keywords.pdf
         # clob all pdf's together into one file
-        rm output.pdf
-        ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o output.pdf
+        rm output.pdf "../$OUTPUT_BASE.pdf"
+        ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o "../$OUTPUT_BASE.pdf"
         # cleanup keyword temp stuff
         rm keywords keywords.ps keywords.pdf
     popd
