@@ -57,6 +57,8 @@ rm -rf $STAGING
 for D in `find $ROOT -mindepth 1 -maxdepth 1 -type d`
 do
     pushd $D
+        # write directory to txt file so is in keywords, replace - and _ with space (replace existing output.txt file)
+        echo $D | sed "s#$ROOT/##g" | tr '-' ' ' | tr '_' ' ' > output.txt
         # create ps from notes
         cat *.txt | sort | uniq > keywords
         enscript -p keywords.ps keywords
