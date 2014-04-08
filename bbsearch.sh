@@ -8,5 +8,5 @@ do
     GREP_STRING="$GREP_STRING -e \"$X\""
 done;
 #echo $GREP_STRING
-find $HOME/Documents/bbsync/ -maxdepth 1 -name '*.pdf' | sed "s#\(.*\)#pdftotext \1 - | $GREP_STRING#g" | sh | sort | uniq
+find $HOME/Documents/bbsync/ -maxdepth 1 -name '*.pdf' | sed "s#\(.*\)#pdftotext \1 - | $GREP_STRING#g" | sh | sort | uniq | tr ':' ' '
 
