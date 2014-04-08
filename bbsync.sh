@@ -67,7 +67,6 @@ do
         ps2pdf keywords.ps keywords.pdf
         # crop keywords so it's not as wide in the final document
         pdfcrop keywords.pdf cropped.pdf
-        rm keywords.pdf
         # clob all pdf's together into one file
         rm output.pdf "../$OUTPUT_BASE.pdf"
         ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o "../$OUTPUT_BASE.pdf"
