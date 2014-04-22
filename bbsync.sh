@@ -16,7 +16,7 @@ fi
 mkdir -p $STAGING
 
 # copy all files
-cp -v /media/SYNCSD/SYNC/FILES/SAVED/* $STAGING
+cp -v -n /media/SYNCSD/SYNC/FILES/SAVED/* $STAGING
 
 # process staged files, either deleting duplicates or prompting user for an action
 echo "Look at PDF then enter text to indicate action.  Enter empty line to skip, + to use same notes, else:"
@@ -27,10 +27,10 @@ do
     COUNT=`find $ROOT -name $FILE_STAGED | grep -v "$STAGING" | wc -l`
     # skip any staged files that already exist
     if [ $COUNT == "0" ]; then
-        # open with evince and then prompt use for option:
+        # open with default pdf viewer and then prompt use for option:
         #   skip = delete from stage
         #   other text is name of directory to stage into
-        evince $STAGING/$FILE_STAGED 2>&1 > /dev/null &
+        gnome-open $STAGING/$FILE_STAGED 2>&1 > /dev/null &
         PID=$!
         read A B
         if [ "$A" == "" ]; then
@@ -44,17 +44,14 @@ do
 
         if [ "$TARGET" != "" ]; then
             mkdir -p $TARGET
-            mv "$STAGING/$FILE_STAGED" $TARGET
+            cp -n "$STAGING/$FILE_STAGED" $TARGET
             echo $KEYWORDS >> "$TARGET/$FILE_STAGED.txt"
         fi
     fi
 done;
 
-# remove stage directory
-rm -rf $STAGING
-
 # create single pdf.  for now, going to do everything always.  will make it smarter later
-for D in `find $ROOT -mindepth 1 -maxdepth 1 -type d`
+for D in `find $ROOT -mindepth 1 -maxdepth 1 -type d | grep -v "$STAGING"`
 do
     pushd $D
         OUTPUT_BASE=`echo $D | sed "s#$ROOT/##g"`
@@ -67,6 +64,7 @@ do
         ps2pdf keywords.ps keywords.pdf
         # crop keywords so it's not as wide in the final document
         pdfcrop keywords.pdf cropped.pdf
+        rm keywords.pdf
         # clob all pdf's together into one file
         rm output.pdf "../$OUTPUT_BASE.pdf"
         ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o "../$OUTPUT_BASE.pdf"
