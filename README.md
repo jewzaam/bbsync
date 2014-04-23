@@ -8,8 +8,8 @@ Dependencies
 
 ## Packages
 * enscript
-* evince
 * ghostscript
+* gnome-open
 * texlive-utils
 
 ## Other
