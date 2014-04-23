@@ -15,6 +15,10 @@ fi
 # make sure staging area exists
 mkdir -p $STAGING
 
+# get a base date
+touch $STAGING/.timestamp
+BASE_TIME=`date -r $STAGING/.timestamp +%s`
+
 # copy all files
 cp -v -n /media/SYNCSD/SYNC/FILES/SAVED/* $STAGING
 
@@ -45,6 +49,7 @@ do
         if [ "$TARGET" != "" ]; then
             mkdir -p $TARGET
             cp -n "$STAGING/$FILE_STAGED" $TARGET
+            touch $TARGET/.timestamp
             echo $KEYWORDS >> "$TARGET/$FILE_STAGED.txt"
         fi
     fi
@@ -53,23 +58,32 @@ done;
 # create single pdf.  for now, going to do everything always.  will make it smarter later
 for D in `find $ROOT -mindepth 1 -maxdepth 1 -type d | grep -v "$STAGING"`
 do
-    pushd $D
-        OUTPUT_BASE=`echo $D | sed "s#$ROOT/##g"`
-        # write directory to txt file so is in keywords, replace - and _ with space (replace existing output.txt file)
-        echo $OUTPUT_BASE | tr '-' ' ' | tr '_' ' ' > output.txt
-        # create ps from notes
-        cat *.txt | sort | uniq > keywords
-        enscript -p keywords.ps keywords
-        # convert ps to pdf
-        ps2pdf keywords.ps keywords.pdf
-        # crop keywords so it's not as wide in the final document
-        pdfcrop keywords.pdf cropped.pdf
-        rm keywords.pdf
-        # clob all pdf's together into one file
-        rm output.pdf "../$OUTPUT_BASE.pdf"
-        ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o "../$OUTPUT_BASE.pdf"
-        # cleanup keyword temp stuff
-        rm keywords keywords.ps keywords.pdf
-    popd
+    if [ ! -f $D/.timestamp ]; then
+        # no timestamp file, just skip (nothing to do)
+        continue;
+    fi
+
+    # check date against base
+    DIR_TIME=`date -r $D/.timestamp +%s`
+    if [ $BASE_TIME -lt $DIR_TIME ]; then
+        pushd $D
+            OUTPUT_BASE=`echo $D | sed "s#$ROOT/##g"`
+            # write directory to txt file so is in keywords, replace - and _ with space (replace existing output.txt file)
+            echo $OUTPUT_BASE | tr '-' ' ' | tr '_' ' ' > output.txt
+            # create ps from notes
+            cat *.txt | sort | uniq > keywords
+            enscript -p keywords.ps keywords
+            # convert ps to pdf
+            ps2pdf keywords.ps keywords.pdf
+            # crop keywords so it's not as wide in the final document
+            pdfcrop keywords.pdf cropped.pdf
+            rm keywords.pdf
+            # clob all pdf's together into one file
+            rm output.pdf "../$OUTPUT_BASE.pdf"
+            ~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console merge -f *.PDF *.pdf -o "../$OUTPUT_BASE.pdf"
+            # cleanup keyword temp stuff
+            rm keywords keywords.ps keywords.pdf
+        popd
+    fi
 done;
 
