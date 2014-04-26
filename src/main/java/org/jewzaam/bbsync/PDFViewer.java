@@ -98,7 +98,7 @@ public class PDFViewer {
 
         //Set up JFrame
         frame.setTitle("bbsync");
-        frame.setSize(600, 800);
+        frame.setSize(600, 900);
         frame.addWindowListener(new WindowListener() {
             @Override
             public void windowActivated(WindowEvent e) {
@@ -141,7 +141,8 @@ public class PDFViewer {
         if (tagFilenames.hasNext()) {
             String filename = this.tagFilenames.next();
             currentTagFilename = filename + ".txt";
-            Object[] input = new Object[]{filename};
+            File[] input = new File[]{new File(filename)};
+            System.out.println("Opening: " + filename);
             viewer.executeCommand(Commands.OPENFILE, input);
             tags.requestFocus();
         }
@@ -152,9 +153,9 @@ public class PDFViewer {
 
         if (null != tagText && !tagText.isEmpty()) {
             System.out.printf("Writing '%s' to '%s'\n", tagText, currentTagFilename);
-            PrintWriter writer = new PrintWriter(currentTagFilename, "UTF-8");
-            writer.println(tagText);
-            writer.close();
+            try (PrintWriter writer = new PrintWriter(currentTagFilename, "UTF-8")) {
+                writer.println(tagText);
+            }
         }
     }
 
