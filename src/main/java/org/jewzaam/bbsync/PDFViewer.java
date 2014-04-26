@@ -143,6 +143,8 @@ public class PDFViewer {
         // create main preview pane
         JInternalFrame rootContainer = new JInternalFrame("Preview Pane");
 
+        System.setProperty("org.jpedal.Viewer.Prefs", "properties.xml");
+        
         // Setup the viewer
         viewer = new Viewer(rootContainer, null);
         viewer.setupViewer();
