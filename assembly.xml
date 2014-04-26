@@ -22,7 +22,6 @@
         <fileSet>
             <includes>
                 <include>org/jewzaam/bbsync/*.class</include>
-                <include>properties.xml</include>
                 <include>.properties.xml</include>
             </includes>
             <directory>target/classes</directory>

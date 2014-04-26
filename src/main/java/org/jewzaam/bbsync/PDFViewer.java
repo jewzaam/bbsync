@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -128,7 +129,7 @@ public class PDFViewer {
             public void windowOpened(WindowEvent e) {
             }
         });
-        
+
         // initialize viewer
         resetViewer();
 
@@ -143,10 +144,10 @@ public class PDFViewer {
         // create main preview pane
         JInternalFrame rootContainer = new JInternalFrame("Preview Pane");
 
-        System.setProperty("org.jpedal.Viewer.Prefs", "properties.xml");
-        
         // Setup the viewer
         viewer = new Viewer(rootContainer, null);
+        // load properties from jar
+        viewer.loadProperties("jar:/.properties.xml");
         viewer.setupViewer();
 
         // Add the viewer to the frame
