@@ -18,11 +18,11 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
 
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -43,20 +43,19 @@ public class PDFViewer {
     private static final String DIR_DEVICE = "/media/SYNCSD/SYNC/FILES/SAVED/";
     private static final String DIR_STAGE = "/home/nmalik/Documents/bbsync/STAGE/";
 
-    private Iterator<String> tagFilenames;
+    private int tagFilenamesIndex = -1;
+    private String[] tagFilenames;
     private String currentTagFilename;
+    private JFrame frame;
     private Viewer viewer;
     private JTextField tags;
 
     public void initialize(Collection<String> tagFilenames) {
-        this.tagFilenames = tagFilenames.iterator();
+        this.tagFilenames = tagFilenames.toArray(new String[]{});
 
         //Create display frame
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         frame.getContentPane().setLayout(new BorderLayout());
-
-        // create main preview pane
-        JInternalFrame rootContainer = new JInternalFrame("Preview Pane");
 
         //Additional Label to show this is another program
         JLabel label = new JLabel("Type tags and hit enter: ");
@@ -80,21 +79,21 @@ public class PDFViewer {
             }
         });
 
+        JButton back = new JButton("Back");
+        back.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showPreviousFile();
+            }
+        });
+
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(label, BorderLayout.WEST);
         panel.add(tags, BorderLayout.CENTER);
+        panel.add(back, BorderLayout.EAST);
 
         frame.add(panel, BorderLayout.SOUTH);
-
-        // Setup the viewer
-        viewer = new Viewer(rootContainer, null);
-        viewer.setupViewer();
-
-        // Add the viewer to the frame
-        frame.add(rootContainer, BorderLayout.CENTER);
-
-        // Require for internalFrame to be displayed
-        rootContainer.setVisible(true);
 
         //Set up JFrame
         frame.setTitle("bbsync");
@@ -129,6 +128,9 @@ public class PDFViewer {
             public void windowOpened(WindowEvent e) {
             }
         });
+        
+        // initialize viewer
+        resetViewer();
 
         // Display Frame
         frame.setVisible(true);
@@ -137,9 +139,42 @@ public class PDFViewer {
         showNextFile();
     }
 
+    public void resetViewer() {
+        // create main preview pane
+        JInternalFrame rootContainer = new JInternalFrame("Preview Pane");
+
+        // Setup the viewer
+        viewer = new Viewer(rootContainer, null);
+        viewer.setupViewer();
+
+        // Add the viewer to the frame
+        frame.add(rootContainer, BorderLayout.CENTER);
+
+        // Require for internalFrame to be displayed
+        rootContainer.setVisible(true);
+    }
+
     public void showNextFile() {
-        if (tagFilenames.hasNext()) {
-            String filename = this.tagFilenames.next();
+        if (tagFilenamesIndex < -1) {
+            // just to make sure it doesn't try to load a negative index
+            tagFilenamesIndex = -1;
+        }
+        if (tagFilenamesIndex + 1 < tagFilenames.length) {
+            String filename = this.tagFilenames[++tagFilenamesIndex];
+            currentTagFilename = filename + ".txt";
+            File[] input = new File[]{new File(filename)};
+            System.out.println("Opening: " + filename);
+            viewer.executeCommand(Commands.OPENFILE, input);
+            tags.requestFocus();
+        } else {
+            // hopefully this clears the file loaded
+            resetViewer();
+        }
+    }
+
+    public void showPreviousFile() {
+        if (0 <= tagFilenamesIndex - 1) {
+            String filename = this.tagFilenames[--tagFilenamesIndex];
             currentTagFilename = filename + ".txt";
             File[] input = new File[]{new File(filename)};
             System.out.println("Opening: " + filename);
