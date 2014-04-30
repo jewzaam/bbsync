@@ -1,0 +1,17 @@
+#!/bin/sh
+
+CMD_SEJDA=~/Downloads/sejda-console-1.0.0.M9/bin/sejda-console
+
+SEARCH_TEXT=$@
+
+
+if [ "$SEARCH_TEXT" == "" ]; then
+    echo "Missing search text as argument, unable to create view."
+    exit 1
+fi
+
+VIEW_FILENAME=`echo "~/Documents/bbsync/$SEARCH_TEXT.pdf" | tr ' ' '_'`
+
+rm -f $VIEW_FILENAME
+
+$CMD_SEJDA merge -f `grep "$SEARCH_TEXT" -l ~/Documents/bbsync/STAGE/*.txt | sed 's/\(.*\)\.txt/\1/g' | sort | uniq | xargs` -o $VIEW_FILENAME
