@@ -10,7 +10,7 @@ if [ "$SEARCH_TEXT" == "" ]; then
     exit 1
 fi
 
-VIEW_FILENAME=`echo "~/Documents/bbsync/$SEARCH_TEXT.pdf" | tr ' ' '_'`
+VIEW_FILENAME=`echo "$HOME/Documents/bbsync/$SEARCH_TEXT.pdf" | tr ' ' '_'`
 
 rm -f $VIEW_FILENAME
 
