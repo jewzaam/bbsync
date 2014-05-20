@@ -1,0 +1,8 @@
+<sejda validation="true">
+    <notification async="false" />
+    <tasks>
+        <task
+            parameters="org.sejda.model.parameter.MergeParameters"
+            task="org.sejda.impl.itext.MergeTask" />
+    </tasks>
+</sejda>

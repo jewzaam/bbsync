@@ -17,29 +17,34 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- copy dependencies to target/lib -->
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.1</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
-                    <archive>
-                        <manifestEntries>
-                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
-                            <Main-Class>org.jewzaam.bbsync.PDFViewer</Main-Class>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <!-- include copied dependencies in jar -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.jewzaam.bbsync.PDFViewer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -57,13 +62,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
+        <sejda.version>1.0.0.M9</sejda.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>jpedal</groupId>
             <artifactId>jpedal</artifactId>
             <version>4.92b23-OS</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -71,6 +76,29 @@
             <version>4.11</version>
             <scope>test</scope>
             <type>jar</type>
+        </dependency>
+        <!-- sejda core -->
+        <dependency>
+            <groupId>org.sejda</groupId>
+            <artifactId>sejda-core</artifactId>
+            <version>${sejda.version}</version>
+        </dependency>
+
+        <!-- you will also need at least one of sejda itext, pdfbox or icepdf -->
+        <dependency>
+            <groupId>org.sejda</groupId>
+            <artifactId>sejda-icepdf</artifactId>
+            <version>${sejda.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sejda</groupId>
+            <artifactId>sejda-itext</artifactId>
+            <version>${sejda.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sejda</groupId>
+            <artifactId>sejda-pdfbox</artifactId>
+            <version>${sejda.version}</version>
         </dependency>
     </dependencies>
 </project>
