@@ -54,7 +54,6 @@ public class PDFViewer {
     private static final String DIR_STAGE = "/home/nmalik/Documents/bbsync/STAGE/";
     private static final String TMP_FILE = "/tmp/bbsync.pdf";
 
-    private int tagFilenamesIndex = 0;
     private String[] tagFilenames;
     private String currentTagFilename;
     private JFrame frame;
@@ -62,20 +61,24 @@ public class PDFViewer {
     private JTextField tags;
 
     public void initialize(Collection<String> tagFilenames) throws TaskException {
-        MergeTask merge = new MergeTask();
-        MergeParameters mp = new MergeParameters();
-        for (String filename : tagFilenames) {
-            File input = new File(filename);
-            System.out.println("Adding to merge: " + filename);
-            mp.addInput(new PdfMergeInput(PdfFileSource.newInstanceNoPassword(input)));
+        if (tagFilenames != null && !tagFilenames.isEmpty()) {
+            MergeTask merge = new MergeTask();
+            MergeParameters mp = new MergeParameters();
+            for (String filename : tagFilenames) {
+                File input = new File(filename);
+                System.out.println("Adding to merge: " + filename);
+                mp.addInput(new PdfMergeInput(PdfFileSource.newInstanceNoPassword(input)));
+            }
+
+            mp.setOverwrite(true);
+            mp.setOutput(new FileTaskOutput(new File(TMP_FILE)));
+            merge.before(mp);
+            merge.execute(mp);
+
+            this.tagFilenames = tagFilenames.toArray(new String[]{});
+        } else {
+            this.tagFilenames = null;
         }
-
-        mp.setOverwrite(true);
-        mp.setOutput(new FileTaskOutput(new File(TMP_FILE)));
-        merge.before(mp);
-        merge.execute(mp);
-
-        this.tagFilenames = tagFilenames.toArray(new String[]{});
 
         //Create display frame
         frame = new JFrame();
@@ -176,7 +179,6 @@ public class PDFViewer {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 // new page inserted in view, load tags
-                tagFilenamesIndex = viewer.getSwingGUI().getCurrentPage();
                 loadTags();
             }
 
@@ -196,52 +198,43 @@ public class PDFViewer {
         rootContainer.setVisible(true);
 
         // shouldn't do this here, but need it for now
-        viewer.executeCommand(Commands.OPENFILE, new File[]{new File(TMP_FILE)});
+        if (this.tagFilenames != null && this.tagFilenames.length > 0) {
+            viewer.executeCommand(Commands.OPENFILE, new File[]{new File(TMP_FILE)});
+        }
     }
 
     public void showNextPage() {
-        if (tagFilenamesIndex < -1) {
-            // just to make sure it doesn't try to load a negative index
-            tagFilenamesIndex = -1;
-        }
-        if (tagFilenamesIndex + 1 < tagFilenames.length) {
-            // next page (page change event will load tags)
-            ++tagFilenamesIndex;
-            viewer.executeCommand(Commands.FORWARDPAGE, null);
-        } else {
-            // hopefully this clears the file loaded
-            resetViewer();
-        }
+        // next page (page change event will load tags)
+        viewer.executeCommand(Commands.FORWARDPAGE, null);
     }
 
     public void showPreviousPage() {
-        if (0 <= tagFilenamesIndex - 1) {
-            // previous page (page change event will load tags)
-            --tagFilenamesIndex;
-            viewer.executeCommand(Commands.BACKPAGE, null);
-        }
+        // previous page (page change event will load tags)
+        viewer.executeCommand(Commands.BACKPAGE, null);
     }
 
     public void loadTags() {
-        // grab tag text and update tags
-        currentTagFilename = this.tagFilenames[tagFilenamesIndex] + ".txt";
+        if (this.tagFilenames != null && this.tagFilenames.length > 0 && viewer.getSwingGUI().getCurrentPage() > 0) {
+            // grab tag text and update tags
+            currentTagFilename = this.tagFilenames[viewer.getSwingGUI().getCurrentPage() - 1] + ".txt";
 
-        try (FileReader fr = new FileReader(currentTagFilename);
-                BufferedReader br = new BufferedReader(fr)) {
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
+            try (FileReader fr = new FileReader(currentTagFilename);
+                    BufferedReader br = new BufferedReader(fr)) {
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
 
-            while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }
+                tags.setText(sb.toString());
+            } catch (FileNotFoundException ex) {
+                // just don't do anything, the tag file doesn't exist which is ok.
+                // expected result: keep whatever text is in 'tags' UI element
+            } catch (IOException ex) {
+                Logger.getLogger(PDFViewer.class.getName()).log(Level.SEVERE, null, ex);
             }
-            tags.setText(sb.toString());
-        } catch (FileNotFoundException ex) {
-            // just don't do anything, the tag file doesn't exist which is ok.
-            // expected result: keep whatever text is in 'tags' UI element
-        } catch (IOException ex) {
-            Logger.getLogger(PDFViewer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // request focus for tags
