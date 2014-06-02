@@ -18,6 +18,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Set;
@@ -278,7 +280,7 @@ public class PDFViewer {
      *
      * @return
      */
-    public Collection<String> getFilesToTag() {
+    public Collection<String> getFilesToTag(String[] filenames) {
         Set<String> output = new TreeSet<>();
 
         File stage = new File(DIR_STAGE);
@@ -287,14 +289,22 @@ public class PDFViewer {
             System.err.println("STAGE DOES NOT EXIST");
         }
 
-        for (final File fileEntry : stage.listFiles()) {
-            if (!fileEntry.isDirectory() && fileEntry.getName().endsWith(".PDF")) {
-                // see if it exists already
-                String filename = DIR_STAGE + fileEntry.getName();
-                File f = new File(filename + ".txt");
-                if (!f.exists()) {
-                    System.out.println("Needs tagging: " + filename);
-                    output.add(filename);
+        if (filenames != null && filenames.length > 0) {
+            for (String filename : filenames) {
+                File f = new File(filename);
+                System.out.println("Adding file from filenames: " + filename);
+                output.add(filename);
+            }
+        } else {
+            for (final File fileEntry : stage.listFiles()) {
+                if (!fileEntry.isDirectory() && fileEntry.getName().endsWith(".PDF")) {
+                    // see if it exists already
+                    String filename = DIR_STAGE + fileEntry.getName();
+                    File f = new File(filename + ".txt");
+                    if (!f.exists()) {
+                        System.out.println("Needs tagging: " + filename);
+                        output.add(filename);
+                    }
                 }
             }
         }
@@ -334,6 +344,6 @@ public class PDFViewer {
     public static void main(String[] args) throws IOException, TaskException {
         PDFViewer v = new PDFViewer();
         v.copyToStage();
-        v.initialize(v.getFilesToTag());
+        v.initialize(v.getFilesToTag(args));
     }
 }
