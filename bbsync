@@ -5,5 +5,10 @@ if [ ! -e target/bbsync-0.1.0-SNAPSHOT.jar ]; then
 fi
 
 SEARCH_TEXT=$@
+SEARCH_RESULT=""
 
-java -jar target/bbsync-0.1.0-SNAPSHOT.jar `grep "$SEARCH_TEXT" -l ~/Documents/bbsync/STAGE/*.txt | sed 's/\(.*\)\.txt/\1/g' | sort | uniq | xargs`
+if [ ! $SEARCH_TEXT == "" ]; then
+    SEARCH_RESULT=`grep "$SEARCH_TEXT" -l ~/Documents/bbsync/STAGE/*.txt | sed 's/\(.*\)\.txt/\1/g' | sort | uniq | xargs`
+fi
+
+java -jar target/bbsync-0.1.0-SNAPSHOT.jar $SEARCH_RESULT
