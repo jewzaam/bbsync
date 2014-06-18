@@ -10,8 +10,14 @@ if [ "$SEARCH_TEXT" == "" ]; then
     exit 1
 fi
 
-VIEW_FILENAME=`echo "$HOME/Documents/bbsync/$SEARCH_TEXT.pdf" | tr ' ' '_'`
+mkdir -p /tmp/bbsync
+
+VIEW_FILENAME=`echo "/tmp/bbsync/$SEARCH_TEXT.pdf" | tr ' ' '_'`
 
 rm -f $VIEW_FILENAME
 
-$CMD_SEJDA merge -f `grep "$SEARCH_TEXT" -l ~/Documents/bbsync/STAGE/*.txt | sed 's/\(.*\)\.txt/\1/g' | sort | uniq | xargs` -o $VIEW_FILENAME
+PDF_FILELIST=`echo $SEARCH_TEXT | echo "egrep -e \"$(sed 's/ /" -e "/g')\" -l ~/Documents/bbsync/STAGE/*.txt" | sh | sed 's/\.txt//g' | sort | uniq | xargs`
+
+$CMD_SEJDA merge -f $PDF_FILELIST -o $VIEW_FILENAME
+
+gnome-open $VIEW_FILENAME
