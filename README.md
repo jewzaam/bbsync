@@ -13,3 +13,9 @@ in order lexigraphically based on the original file names.
 
 * JPedal (LGPL)
 * [sejda-console](http://www.sejda.org/)
+
+# How to install sejda-console
+```
+wget https://github.com/torakiki/sejda/releases/download/v1.0.0.M9/sejda-console-1.0.0.M9-bin.zip -O ~/Downloads/sejda-console-1.0.0.M9-bin.zip
+unzip ~/Downloads/sejda-console-1.0.0.M9-bin.zip -d ~/Downloads
+```
