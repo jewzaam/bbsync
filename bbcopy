@@ -1,0 +1,20 @@
+#!/bin/sh
+
+SRC_FILE=$1
+DEST_FILE=$2
+
+if [ "${SRC_FILE}x" == "x" ]; then
+    echo "usage $0 <source file> [<output file>]"
+    echo ""
+    echo "NOTES:"
+    echo "- '.PDF' is appended to the output filename"
+    echo "- if output file is not set the source file name is used (removes directories from path)"
+    echo "- output file is created in ~/Documents/bbsync/STAGE/" 
+    exit 1
+fi
+
+if [ "${DEST_FILE}x" == "x" ]; then
+    DEST_FILE=`echo "$SRC_FILE" | sed 's#.*/\([^/]*$\)#\1#g'`
+fi
+
+enscript ${SRC_FILE} --output=- | ps2pdf - > ~/Documents/bbsync/STAGE/${DEST_FILE}.PDF
